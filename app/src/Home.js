@@ -28,7 +28,9 @@ const Home = () => {
       <header className="header">
         <h1 className="logo">MockBit</h1>
         <nav className="nav">
-          <a href="#" className="nav-link">거래소</a>
+          <div>
+          <Link to="/exchange" className="nav-link">거래소</Link>
+          </div>
           <a href="#" className="nav-link">투자내역</a>
           <a href="#" className="nav-link">랭킹</a>
           <div>
