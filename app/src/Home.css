@@ -1,0 +1,129 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #ffffff;
+    color: #1a1a1a;
+    overflow: hidden;
+  }
+  
+  .header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    position: absolute;
+    top: 0;
+  }
+  
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #1a1a1a;
+  }
+  
+  .nav {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+  
+  .nav-link {
+    text-decoration: none;
+    color: #666;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-link:hover {
+    color: #000;
+  }
+  
+  .github-link {
+    color: #666;
+    transition: color 0.3s ease;
+  }
+  
+  .github-link:hover {
+    color: #000;
+  }
+  
+  .main-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .title {
+    font-size: 3.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    color: #1a1a1a;
+  }
+  
+  @media (max-width: 768px) {
+    .title {
+      font-size: 2.5rem;
+    }
+  }
+  
+  .description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #666;
+    margin-bottom: 2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .description {
+      font-size: 1rem;
+      padding: 0 1rem;
+    }
+  }
+  
+  .cta-button {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cta-button:hover {
+    background-color: #000;
+  }
+  
+  .price-display {
+    margin-top: 2.5rem;
+    padding: 2rem;
+    background-color: #f8f8f8;
+    border-radius: 12px;
+    text-align: center;
+  }
+  
+  .price-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 1rem 0;
+  }
+  
+  .price-change {
+    color: #22c55e;
+  }
+  
