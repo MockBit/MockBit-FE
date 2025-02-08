@@ -16,6 +16,7 @@ const Exchange = () => {
     const [price, setPrice] = useState('');
     const [amount, setAmount] = useState('');
     const [leverage, setLeverage] = useState(1);
+    const [pendingOrders, setPendingOrders] = useState([]);
 
   useEffect(() => {
     const newChart = init('kline-chart');
@@ -74,18 +75,20 @@ const Exchange = () => {
       const reader = new FileReader();
       reader.onload = () => {
         const text = reader.result;
-        const jsonData = JSON.parse(text);
-
-        const newTrade = {
-          open: jsonData.opening_price,
-          close: jsonData.trade_price,
-          high: jsonData.high_price,
-          low: jsonData.low_price,
-          volume: jsonData.acc_trade_volume,
-          timestamp: jsonData.timestamp,
-        };
-
-        updateCandle(unit, newTrade, chartInstance);
+        try {
+          const jsonData = JSON.parse(text.toString());
+          const newTrade = {
+            open: jsonData.opening_price,
+            close: jsonData.trade_price,
+            high: jsonData.high_price,
+            low: jsonData.low_price,
+            volume: jsonData.acc_trade_volume,
+            timestamp: jsonData.timestamp,
+          };
+          updateCandle(unit, newTrade, chartInstance);
+        } catch (error) {
+          console.error("데이터 파싱 오류:", error);
+        }
       };
       reader.readAsText(event.data);
     };
@@ -178,6 +181,16 @@ const Exchange = () => {
     });
     alert(`${position.toUpperCase()} ${orderType.toUpperCase()} 주문 실행!`);
   };
+
+  const handleEditOrder = (orderId) => {
+    // 주문 수정 로직 구현
+    console.log('주문 수정:', orderId);
+  };
+
+  const handleCancelOrder = (orderId) => {
+    setPendingOrders(pendingOrders.filter(order => order.id !== orderId));
+  };
+
   return (
     <div className="container">
       <div className="chart-section">
@@ -223,45 +236,126 @@ const Exchange = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
       >
-        <h3>거래 주문</h3>
+        <h2 className="chart-title">거래 주문</h2>
   
         <div className="order-type">
-          <button className={orderType === 'limit' ? 'active' : ''} onClick={() => setOrderType('limit')}>지정가</button>
-          <button className={orderType === 'market' ? 'active' : ''} onClick={() => setOrderType('market')}>시장가</button>
+          <button 
+            className={orderType === 'limit' ? 'active' : ''} 
+            onClick={() => setOrderType('limit')}
+          >
+            지정가
+          </button>
+          <button 
+            className={orderType === 'market' ? 'active' : ''} 
+            onClick={() => setOrderType('market')}
+          >
+            시장가
+          </button>
         </div>
   
         <div className="position-selector">
-          <button className={position === 'long' ? 'active' : ''} onClick={() => setPosition('long')}>롱</button>
-          <button className={position === 'short' ? 'active' : ''} onClick={() => setPosition('short')}>숏</button>
+          <button 
+            className={position === 'long' ? 'active' : ''} 
+            onClick={() => setPosition('long')}
+          >
+            롱
+          </button>
+          <button 
+            className={position === 'short' ? 'active' : ''} 
+            onClick={() => setPosition('short')}
+          >
+            숏
+          </button>
         </div>
   
         {orderType === 'limit' && (
+          <div className="input-group">
+            <label>주문 가격</label>
+            <input 
+              type="number" 
+              placeholder="가격을 입력하세요" 
+              value={price} 
+              onChange={(e) => setPrice(e.target.value)}
+            />
+          </div>
+        )}
+
+        <div className="input-group">
+          <label>주문 수량</label>
           <input 
             type="number" 
-            placeholder="가격 입력" 
-            value={price} 
-            onChange={(e) => setPrice(e.target.value)}
+            placeholder="수량을 입력하세요" 
+            value={amount} 
+            onChange={(e) => setAmount(e.target.value)}
           />
-        )}
-        <input 
-          type="number" 
-          placeholder="수량 입력" 
-          value={amount} 
-          onChange={(e) => setAmount(e.target.value)}
-        />
+        </div>
   
-        <label>레버리지: {leverage}x</label>
-        <input 
-          type="range" 
-          min="1" 
-          max="100" 
-          value={leverage} 
-          onChange={(e) => setLeverage(e.target.value)}
-        />
+        <div className="leverage-slider">
+          <div className="leverage-display">
+            <label>레버리지</label>
+            <div className="leverage-value">
+              <input
+                type="number"
+                className="leverage-input"
+                value={leverage}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  if (value >= 1 && value <= 100) {
+                    setLeverage(value);
+                  }
+                }}
+                min="1"
+                max="100"
+              />
+              <span>x</span>
+            </div>
+          </div>
+          <input 
+            type="range" 
+            min="1" 
+            max="100" 
+            value={leverage} 
+            onChange={(e) => setLeverage(Number(e.target.value))}
+          />
+        </div>
   
         <div className="trade-buttons">
           <button className="buy-button" onClick={() => placeOrder('buy')}>매수</button>
           <button className="sell-button" onClick={() => placeOrder('sell')}>매도</button>
+        </div>
+
+        <div className="pending-orders">
+          <h4>미체결 주문</h4>
+          <div className="order-list">
+            {pendingOrders.map((order) => (
+              <div key={order.id} className="order-item">
+                <div className="order-item-header">
+                  <span className={`order-type-tag ${order.type}`}>
+                    {order.type.toUpperCase()}
+                  </span>
+                  <span>{new Date(order.timestamp).toLocaleTimeString()}</span>
+                </div>
+                <div className="order-details">
+                  <div>가격: ₩{Number(order.price).toLocaleString()}</div>
+                  <div>수량: {order.amount} BTC</div>
+                </div>
+                <div className="order-actions">
+                  <button 
+                    className="edit-button"
+                    onClick={() => handleEditOrder(order.id)}
+                  >
+                    수정
+                  </button>
+                  <button 
+                    className="cancel-button"
+                    onClick={() => handleCancelOrder(order.id)}
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </motion.div>
     </div>
