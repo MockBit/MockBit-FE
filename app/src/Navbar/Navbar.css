@@ -1,0 +1,51 @@
+.header {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;     /* ✅ 화면 중앙 정렬 */
+    padding: 1rem 2rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    z-index: 1000;
+}
+  
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    cursor: pointer;
+  }
+  
+  .nav {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  
+  .nav-link {
+    text-decoration: none;
+    color: #666;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .nav-link:hover {
+    color: #000;
+  }
+  
+  .github-link {
+    display: flex;
+    color: #666;
+    transition: color 0.3s ease;
+  }
+  
+  .github-link:hover {
+    color: #000;
+  }
+
+  
