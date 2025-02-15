@@ -42,6 +42,7 @@ const Navbar = () => {
 
       setIsLoggedIn(false);
       navigate('/');
+      window.location.reload();
     } catch (error) {
       console.error("로그아웃 중 오류 발생:", error);
     }

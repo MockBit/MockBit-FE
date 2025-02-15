@@ -18,6 +18,7 @@ const Exchange = () => {
     const [leverage, setLeverage] = useState(1);
     const [pendingOrders, setPendingOrders] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);    
 
     useEffect(() => {
         const newChart = init('kline-chart');
@@ -209,15 +210,36 @@ const Exchange = () => {
         }
     };
   
-    const placeOrder = (type) => {
-        console.log(`주문 실행: ${type}`, {
-        orderType,
-        position,
-        price,
-        amount,
-        leverage
-        });
-        alert(`${position.toUpperCase()} ${orderType.toUpperCase()} 주문 실행!`);
+    const placeOrder = async (type) => {
+        if (!isLoggedIn) {
+            alert("로그인이 필요합니다.");
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:8080/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderType,
+                    position,
+                    price,
+                    amount,
+                    leverage
+                }),
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                throw new Error("주문 실패! 다시 시도하세요.");
+            }
+
+            alert(`${position.toUpperCase()} ${orderType.toUpperCase()} 주문이 실행되었습니다!`);
+        } catch (error) {
+            console.error("주문 오류:", error);
+            alert("주문을 처리하는 중 오류가 발생했습니다.");
+        }
     };
 
     const handleEditOrder = (orderId) => {
@@ -232,26 +254,6 @@ const Exchange = () => {
         return (
         <div className="container">
         <div className="chart-section">
-            <header className="header">
-            <h1 className="logo" onClick={() => navigate('/')}>MockBit</h1>
-            <nav className="nav">
-                <Link to="/exchange" className="nav-link">거래소</Link>
-                <a href="#" className="nav-link">투자내역</a>
-                <a href="#" className="nav-link">랭킹</a>
-                <Link to="/login" className="nav-link">로그인</Link>
-                <motion.a 
-                href="https://github.com/MockBit"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="github-link"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                >
-                <Github size={24} />
-                </motion.a>
-            </nav>
-            </header>
-            
             <motion.div 
             className="chart-box"
             initial={{ opacity: 0, y: -20 }}
