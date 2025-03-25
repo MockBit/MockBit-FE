@@ -14,7 +14,7 @@ const Exchange = () => {
     const [orderType, setOrderType] = useState('limit');
     const [position, setPosition] = useState('long');
     const [price, setPrice] = useState('');
-    const [amount, setAmount] = useState('');
+    const [orderPrice, setOrderPrice] = useState('');
     const [leverage, setLeverage] = useState(1);
     const [pendingOrders, setPendingOrders] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -41,7 +41,7 @@ const Exchange = () => {
     useEffect(() => {
         if (chart) {
         if (socket) socket.close(); 
-        setupWebSocket(timeframe, chart);
+            setupWebSocket(timeframe, chart);
         }
     }, [chart, timeframe]);
 
@@ -115,18 +115,18 @@ const Exchange = () => {
         reader.onload = () => {
             const text = reader.result;
             try {
-            const jsonData = JSON.parse(text.toString());
-            const newTrade = {
-                open: jsonData.opening_price,
-                close: jsonData.trade_price,
-                high: jsonData.high_price,
-                low: jsonData.low_price,
-                volume: jsonData.acc_trade_volume,
-                timestamp: jsonData.timestamp,
-            };
-            updateCandle(unit, newTrade, chartInstance);
+                const jsonData = JSON.parse(text.toString());
+                const newTrade = {
+                    open: jsonData.opening_price,
+                    close: jsonData.trade_price,
+                    high: jsonData.high_price,
+                    low: jsonData.low_price,
+                    volume: jsonData.acc_trade_volume,
+                    timestamp: jsonData.timestamp,
+                };
+                updateCandle(unit, newTrade, chartInstance);
             } catch (error) {
-            console.error("데이터 파싱 오류:", error);
+                console.error("데이터 파싱 오류:", error);
             }
         };
         reader.readAsText(event.data);
@@ -145,14 +145,14 @@ const Exchange = () => {
         if (!timestamp || isNaN(timestamp)) return;
     
         if (timestamp.toString().length === 10) {
-        timestamp = timestamp * 1000;
+            timestamp = timestamp * 1000;
         }
     
         const interval = unit * 60 * 1000; 
         const dataList = chartInstance.getDataList();
     
         if (!dataList || dataList.length === 0) {
-        return;
+            return;
         }
     
         const lastCandle = dataList[dataList.length - 1];
@@ -161,72 +161,104 @@ const Exchange = () => {
         const tradePrice = parseFloat(tradeData.close);
     
         const newCandle = {
-        timestamp: timestamp,
-        open: lastCandle.close || tradePrice,
-        close: tradePrice,
-        high: Math.max(lastCandle.high, tradePrice),
-        low: Math.min(lastCandle.low, tradePrice), 
-        volume: (lastCandle.volume || 0) + parseFloat(tradeData.volume || 0),
+            timestamp: timestamp,
+            open: lastCandle.close || tradePrice,
+            close: tradePrice,
+            high: Math.max(lastCandle.high, tradePrice),
+            low: Math.min(lastCandle.low, tradePrice), 
+            volume: (lastCandle.volume || 0) + parseFloat(tradeData.volume || 0),
         };
     
         if (unit === "1") {
-        if (timestamp - lastTimestamp >= interval) {
-            chartInstance.applyNewData([...dataList, newCandle]);
-        } else {
-            lastCandle.close = newCandle.close;
-            lastCandle.high = Math.max(lastCandle.high, tradePrice); 
-            lastCandle.low = Math.min(lastCandle.low, tradePrice);   
-            lastCandle.volume += newCandle.volume;
-    
-            chartInstance.updateData(lastCandle);
-        }
-        } else {
-        if (unit === "1440") {
-            const lastDate = new Date(lastTimestamp).toDateString();
-            const newDate = new Date(timestamp).toDateString();
-    
-            if (lastDate !== newDate) {
-            chartInstance.applyNewData([...dataList, newCandle]);
-            } else {
-            lastCandle.close = newCandle.close;
-            lastCandle.high = Math.max(lastCandle.high, tradePrice); 
-            lastCandle.low = Math.min(lastCandle.low, tradePrice);   
-            lastCandle.volume += newCandle.volume;
-    
-            chartInstance.updateData(lastCandle);
-            }
-        } else {
             if (timestamp - lastTimestamp >= interval) {
-            chartInstance.applyNewData([...dataList, newCandle]);
+                chartInstance.applyNewData([...dataList, newCandle]);
             } else {
-            lastCandle.close = newCandle.close;
-            lastCandle.high = Math.max(lastCandle.high, tradePrice);
-            lastCandle.low = Math.min(lastCandle.low, tradePrice);
-            lastCandle.volume += newCandle.volume;
-    
-            chartInstance.updateData(lastCandle);
+                lastCandle.close = newCandle.close;
+                lastCandle.high = Math.max(lastCandle.high, tradePrice); 
+                lastCandle.low = Math.min(lastCandle.low, tradePrice);   
+                lastCandle.volume += newCandle.volume;
+        
+                chartInstance.updateData(lastCandle);
             }
-        }
+        } else {
+            if (unit === "1440") {
+                const lastDate = new Date(lastTimestamp).toDateString();
+                const newDate = new Date(timestamp).toDateString();
+        
+                if (lastDate !== newDate) {
+                    chartInstance.applyNewData([...dataList, newCandle]);
+                } else {
+                    lastCandle.close = newCandle.close;
+                    lastCandle.high = Math.max(lastCandle.high, tradePrice); 
+                    lastCandle.low = Math.min(lastCandle.low, tradePrice);   
+                    lastCandle.volume += newCandle.volume;
+            
+                    chartInstance.updateData(lastCandle);
+                }
+            } else {
+                if (timestamp - lastTimestamp >= interval) {
+                    chartInstance.applyNewData([...dataList, newCandle]);
+                } else {
+                    lastCandle.close = newCandle.close;
+                    lastCandle.high = Math.max(lastCandle.high, tradePrice);
+                    lastCandle.low = Math.min(lastCandle.low, tradePrice);
+                    lastCandle.volume += newCandle.volume;
+            
+                    chartInstance.updateData(lastCandle);
+                }
+            }
         }
     };
-  
-    const placeOrder = async (type) => {
+
+    const executeLimitOrder = async (type) => {
         if (!isLoggedIn) {
-            alert("로그인이 필요합니다.");
+            alert("로그인이 필요한 서비스입니다.");
             navigate('/login');
             return;
         }
 
         try {
-            const response = await fetch('http://localhost:8080/api/orders', {
+            const response = await fetch('http://localhost:8080/api/limit/orders/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    orderType,
-                    position,
-                    price,
-                    amount,
-                    leverage
+                    price: Number(price),
+                    btcPrice: btcPrice, // upbit websocket으로부터 전달되는 현재 btc 가격(추후 수정 요망)
+                    orderPrice: orderPrice,
+                    leverage: Number(leverage),
+                    position: position,
+                    sellOrBuy: type
+                }),
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                throw new Error("주문 실패! 다시 시도하세요.");
+            }
+
+            alert(`${position.toUpperCase()} ${orderType.toUpperCase()} 주문이 실행되었습니다!`);
+        } catch (error) {
+            console.error("주문 오류:", error);
+            alert("주문을 처리하는 중 오류가 발생했습니다.");
+        }
+    };
+  
+    const executeMarketOrder = async (type) => {
+        if (!isLoggedIn) {
+            alert("로그인이 필요한 서비스입니다.");
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:8080/api/market/orders/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderPrice: price,
+                    leverage: Number(leverage),
+                    position: position,
+                    sellOrBuy: type
                 }),
                 credentials: 'include',
             });
@@ -251,14 +283,14 @@ const Exchange = () => {
         setPendingOrders(pendingOrders.filter(order => order.id !== orderId));
     };
 
-        return (
+    return (
         <div className="container">
         <div className="chart-section">
             <motion.div 
-            className="chart-box"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+                className="chart-box"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
             >
             <h2 className="chart-title">비트코인 실시간 차트</h2>
             <div className="timeframe-selector">
@@ -294,31 +326,16 @@ const Exchange = () => {
             </button>
             </div>
     
-            <div className="position-selector">
-            <button 
-                className={position === 'long' ? 'active' : ''} 
-                onClick={() => setPosition('long')}
-            >
-                롱
-            </button>
-            <button 
-                className={position === 'short' ? 'active' : ''} 
-                onClick={() => setPosition('short')}
-            >
-                숏
-            </button>
-            </div>
-    
             {orderType === 'limit' && (
-            <div className="input-group">
-                <label>주문 가격</label>
-                <input 
-                type="number" 
-                placeholder="가격을 입력하세요" 
-                value={price} 
-                onChange={(e) => setPrice(e.target.value)}
-                />
-            </div>
+                <div className="input-group">
+                    <label>주문 가격</label>
+                    <input 
+                    type="number" 
+                    placeholder="가격을 입력하세요" 
+                    value={price} 
+                    onChange={(e) => setPrice(e.target.value)}
+                    />
+                </div>
             )}
 
             <div className="input-group">
@@ -326,8 +343,8 @@ const Exchange = () => {
             <input 
                 type="number" 
                 placeholder="수량을 입력하세요" 
-                value={amount} 
-                onChange={(e) => setAmount(e.target.value)}
+                value={orderPrice} 
+                onChange={(e) => setOrderPrice(e.target.value)}
             />
             </div>
     
@@ -361,8 +378,22 @@ const Exchange = () => {
             </div>
     
             <div className="trade-buttons">
-            <button className="buy-button" onClick={() => placeOrder('buy')}>매수</button>
-            <button className="sell-button" onClick={() => placeOrder('sell')}>매도</button>
+                <button 
+                    className="buy-button" 
+                    onClick={() => {
+                        orderType === 'limit' ? executeLimitOrder('BUY') : executeMarketOrder('BUY');
+                    }}
+                >
+                    매수(Long)
+                </button>
+                <button 
+                    className="sell-button" 
+                    onClick={() => {
+                        orderType === 'limit' ? executeLimitOrder('SELL') : executeMarketOrder('SELL');
+                    }}
+                >
+                    매도(Short)
+                </button>
             </div>
 
             <div className="pending-orders">
