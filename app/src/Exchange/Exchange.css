@@ -368,3 +368,21 @@ transform: scale(1.1);
 .cancel-button:hover {
   background: #ffcdd2;
 }
+
+.balance-info {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+  
+.balance-info label {
+  font-weight: bold;
+}
+  
+.balance-info span {
+  color: #333;
+}

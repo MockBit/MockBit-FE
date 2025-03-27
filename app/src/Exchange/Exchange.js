@@ -18,12 +18,14 @@ const Exchange = () => {
     const [leverage, setLeverage] = useState(1);
     const [pendingOrders, setPendingOrders] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);    
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [balance, setBalance] = useState(null);
 
     useEffect(() => {
         const newChart = init('kline-chart');
         setChart(newChart);
         fetchChartData(timeframe, newChart);
+        fetchBalance();
 
         newChart.subscribeAction('scroll', async () => {
             const dataList = newChart.getDataList();
@@ -44,6 +46,30 @@ const Exchange = () => {
             setupWebSocket(timeframe, chart);
         }
     }, [chart, timeframe]);
+
+    const fetchBalance = async () => {
+        if (!isLoggedIn) {
+            setBalance(0);
+            return;
+        }
+    
+        try {
+          const response = await fetch('http://localhost:8080/api/accounts/balance', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+          });
+    
+          if (!response.ok) {
+            throw new Error('잔액 조회 실패');
+          }
+    
+          const data = await response.json();
+          setBalance(data.balance);
+        } catch (error) {
+          console.error('잔액 조회 오류:', error);
+        }
+    };
 
     const fetchChartData = async (unit, chartInstance) => {
         try {
@@ -223,7 +249,7 @@ const Exchange = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     price: Number(price),
-                    btcPrice: btcPrice, // upbit websocket으로부터 전달되는 현재 btc 가격(추후 수정 요망)
+                    btcPrice: orderPrice, // upbit websocket으로부터 전달되는 현재 btc 가격(추후 수정 요망)
                     orderPrice: orderPrice,
                     leverage: Number(leverage),
                     position: position,
@@ -236,6 +262,7 @@ const Exchange = () => {
                 throw new Error("주문 실패! 다시 시도하세요.");
             }
 
+            fetchBalance();
             alert(`${position.toUpperCase()} ${orderType.toUpperCase()} 주문이 실행되었습니다!`);
         } catch (error) {
             console.error("주문 오류:", error);
@@ -267,6 +294,7 @@ const Exchange = () => {
                 throw new Error("주문 실패! 다시 시도하세요.");
             }
 
+            fetchBalance();
             alert(`${position.toUpperCase()} ${orderType.toUpperCase()} 주문이 실행되었습니다!`);
         } catch (error) {
             console.error("주문 오류:", error);
@@ -310,6 +338,17 @@ const Exchange = () => {
             transition={{ duration: 0.4, delay: 0.2 }}
         >
             <h2 className="chart-title">거래 주문</h2>
+
+            <div className="balance-info">
+                <label>주문가능</label>
+                <span>
+                    {balance !== null
+                    ? `${Number(balance).toLocaleString()} KRW`
+                    : isLoggedIn
+                    ? '0'
+                    : '0'}
+                </span>
+            </div>
     
             <div className="order-type">
             <button 
@@ -326,27 +365,27 @@ const Exchange = () => {
             </button>
             </div>
     
+            <div className="input-group">
+                <label>수량(BTC)</label>
+                <input 
+                    type="number" 
+                    placeholder="수량을 입력하세요" 
+                    value={orderPrice} 
+                    onChange={(e) => setOrderPrice(e.target.value)}
+                />
+            </div>
+
             {orderType === 'limit' && (
                 <div className="input-group">
-                    <label>주문 가격</label>
+                    <label>가격(KRW)</label>
                     <input 
                     type="number" 
-                    placeholder="가격을 입력하세요" 
+                    placeholder="구매하려는 BTC 가격을 입력하세요" 
                     value={price} 
                     onChange={(e) => setPrice(e.target.value)}
                     />
                 </div>
             )}
-
-            <div className="input-group">
-            <label>주문 수량</label>
-            <input 
-                type="number" 
-                placeholder="수량을 입력하세요" 
-                value={orderPrice} 
-                onChange={(e) => setOrderPrice(e.target.value)}
-            />
-            </div>
     
             <div className="leverage-slider">
             <div className="leverage-display">
@@ -389,7 +428,7 @@ const Exchange = () => {
                 <button 
                     className="sell-button" 
                     onClick={() => {
-                        orderType === 'limit' ? executeLimitOrder('SELL') : executeMarketOrder('SELL');
+                        orderType === 'limit' ? executeLimitOrder('BUY') : executeMarketOrder('BUY');
                     }}
                 >
                     매도(Short)
