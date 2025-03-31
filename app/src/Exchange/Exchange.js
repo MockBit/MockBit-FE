@@ -223,7 +223,7 @@ const Exchange = () => {
                     sellOrBuy: type
                 }),
                 credentials: 'include',
-            });
+            }); //temp
 
             if (!response.ok) throw new Error("주문 실패");
             fetchBalance();
