@@ -1,8 +1,6 @@
 .header {
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto; 
-    padding: 1rem 2rem;
+    padding: 1rem 0;
     position: fixed;
     top: 0;
     left: 0;
@@ -10,21 +8,23 @@
     background-color: #ffffff;
     z-index: 1000;
 }
-  
-  .logo {
+
+.logo {
     font-size: 1.5rem;
     font-weight: 500;
     color: #1a1a1a;
     cursor: pointer;
-  }
-  
-  .nav {
+    margin-left: 2rem;
+}
+
+.nav {
     display: flex;
     gap: 1.5rem;
     align-items: center;
-  }
-  
-  .nav-link {
+    margin-right: 2rem;
+}
+
+.nav-link {
     text-decoration: none;
     color: #666;
     font-size: 0.9rem;
@@ -32,20 +32,18 @@
     background: none;
     border: none;
     cursor: pointer;
-  }
-  
-  .nav-link:hover {
+}
+
+.nav-link:hover {
     color: #000;
-  }
-  
-  .github-link {
+}
+
+.github-link {
     display: flex;
     color: #666;
     transition: color 0.3s ease;
-  }
-  
-  .github-link:hover {
-    color: #000;
-  }
+}
 
-  
+.github-link:hover {
+    color: #000;
+}
