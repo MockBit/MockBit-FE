@@ -19,12 +19,14 @@ const Exchange = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [balance, setBalance] = useState(null);
     const [activeTab, setActiveTab] = useState('positions');
+    const [btcPrice, setBtcPrice] = useState('');
 
     useEffect(() => {
         const newChart = init('kline-chart');
         setChart(newChart);
         fetchChartData(timeframe, newChart);
         fetchBalance();
+        fetchPendingOrders();
 
         newChart.subscribeAction('scroll', async () => {
             const dataList = newChart.getDataList();
@@ -62,6 +64,26 @@ const Exchange = () => {
             setBalance(data.balance);
         } catch (error) {
             console.error('잔액 조회 오류:', error);
+        }
+    };
+
+    const fetchPendingOrders = async () => {
+        if (!isLoggedIn) return;
+        try {
+            const response = await fetch('http://localhost:8080/api/limit/orders/pending/orders', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+            });
+            if (response.status === 204) {
+                setPendingOrders([]);
+                return;
+            }
+            if (!response.ok) throw new Error('미체결 주문 조회 실패');
+            const data = await response.json();
+            setPendingOrders(data);
+        } catch (error) {
+            console.error('미체결 주문 조회 오류:', error);
         }
     };
 
@@ -143,6 +165,7 @@ const Exchange = () => {
                         volume: jsonData.acc_trade_volume,
                         timestamp: jsonData.timestamp,
                     };
+                    setBtcPrice(jsonData.trade_price.toString());
                     updateCandle(unit, newTrade, chartInstance);
                 } catch (error) {
                     console.error("데이터 파싱 오류:", error);
@@ -216,25 +239,18 @@ const Exchange = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     price: Number(price),
-                    btcPrice: orderPrice, // upbit websocket으로부터 전달되는 현재 btc 가격(추후 수정 요망)
+                    btcPrice: btcPrice,
                     orderPrice: orderPrice,
                     leverage: Number(leverage),
                     position: position,
                     sellOrBuy: type
                 }),
                 credentials: 'include',
-            }); //temp
+            });
 
             if (!response.ok) throw new Error("주문 실패");
             fetchBalance();
-            const newOrder = {
-                id: Date.now(),
-                type: position,
-                price: price,
-                amount: orderPrice,
-                timestamp: new Date()
-            };
-            setPendingOrders([...pendingOrders, newOrder]);
+            fetchPendingOrders();
             alert(`${position.toUpperCase()} 지정가 주문이 실행되었습니다!`);
         } catch (error) {
             console.error("주문 오류:", error);
