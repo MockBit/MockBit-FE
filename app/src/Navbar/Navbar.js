@@ -1,37 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Github } from 'lucide-react';
 import './Navbar.css';
+import { AuthContext } from '../Login/AuthContext';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/users/status', {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        });
-
-        if (!response.ok) {
-          setIsLoggedIn(false);
-          return;
-        }
-
-        const data = await response.json();
-        setIsLoggedIn(data.isLoggedIn);
-      } catch (error) {
-        console.error("로그인 상태 확인 오류:", error);
-        setIsLoggedIn(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, []);
+  const authContext = useContext(AuthContext);
+  const { isLoggedIn, setIsLoggedIn } = authContext;
 
   const handleLogout = async () => {
     try {

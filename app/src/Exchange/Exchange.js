@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { init, dispose } from 'klinecharts';
+import { AuthContext } from '../Login/AuthContext';
 import './Exchange.css';
 
 const Exchange = () => {
@@ -16,7 +17,7 @@ const Exchange = () => {
     const [leverage, setLeverage] = useState(1);
     const [pendingOrders, setPendingOrders] = useState([]);
     const [currentPositions, setCurrentPositions] = useState([]);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { isLoggedIn, userId } = useContext(AuthContext);
     const [balance, setBalance] = useState(null);
     const [activeTab, setActiveTab] = useState('positions');
     const [btcPrice, setBtcPrice] = useState('');

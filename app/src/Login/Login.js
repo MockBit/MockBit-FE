@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from './AuthContext';
 import './Login.css';
 
 const Login = () => {
@@ -8,6 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { setIsLoggedIn } = useContext(AuthContext);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -25,7 +27,8 @@ const Login = () => {
         alert("아이디 또는 비밀번호가 일치하지 않습니다.");
         throw new Error("아이디 또는 비밀번호를 확인해주세요.");
       }
-
+      
+      setIsLoggedIn(true);
       navigate('/');
       window.location.reload();
     } catch (err) {
