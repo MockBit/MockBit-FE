@@ -238,7 +238,7 @@ const Exchange = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    price: Number(price),
+                    price: price,
                     btcPrice: btcPrice,
                     orderPrice: orderPrice,
                     leverage: Number(leverage),
