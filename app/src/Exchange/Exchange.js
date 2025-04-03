@@ -265,12 +265,16 @@ const Exchange = () => {
             navigate('/login');
             return;
         }
+        if (!orderPrice || orderPrice.trim() === "") {
+            alert("수량을 입력해주세요.");
+            return;
+        }
         try {
             const response = await fetch('http://localhost:8080/api/market/orders/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    orderPrice: price,
+                    orderPrice: orderPrice,
                     leverage: Number(leverage),
                     position: position,
                     sellOrBuy: type
@@ -407,10 +411,10 @@ const Exchange = () => {
                 </div>
 
                 <div className="input-group">
-                    <label>수량(BTC)</label>
+                    <label>주문 가격(KRW)</label>
                     <input
                         type="number"
-                        placeholder="수량을 입력하세요"
+                        placeholder="주문 금액을 입력하세요"
                         value={orderPrice}
                         onChange={(e) => setOrderPrice(e.target.value)}
                     />
@@ -418,7 +422,7 @@ const Exchange = () => {
 
                 {orderType === 'limit' && (
                     <div className="input-group">
-                        <label>가격(KRW)</label>
+                        <label>BTC 가격(KRW)</label>
                         <input
                             type="number"
                             placeholder="구매하려는 BTC 가격을 입력하세요"
