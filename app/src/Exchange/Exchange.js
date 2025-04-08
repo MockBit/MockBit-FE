@@ -10,6 +10,7 @@ const Exchange = () => {
     const [chart, setChart] = useState(null);
     const [timeframe, setTimeframe] = useState('1440');
     const [socket, setSocket] = useState(null);
+    const [profitSocket, setProfitSocket] = useState(null);
     const [orderType, setOrderType] = useState('limit');
     const [position, setPosition] = useState('LONG');
     const [price, setPrice] = useState('');
@@ -21,6 +22,11 @@ const Exchange = () => {
     const [balance, setBalance] = useState(null);
     const [activeTab, setActiveTab] = useState('positions');
     const [btcPrice, setBtcPrice] = useState('');
+    const [profitData, setProfitData] = useState({
+        profitAmount: 0,
+        profitRate: 0,
+        position: null,
+    });
 
     useEffect(() => {
         const newChart = init('kline-chart');
@@ -48,6 +54,47 @@ const Exchange = () => {
             setupWebSocket(timeframe, chart);
         }
     }, [chart, timeframe]);
+
+    useEffect(() => {
+        if (!isLoggedIn || !userId) return;
+        console.log("User ID:", userId);
+
+        const ws = new WebSocket(`ws://localhost:8080/ws/profit?userId=${userId}`);
+
+        ws.onopen = () => {
+            console.log('수익 웹소켓 연결 성공');
+        };
+
+        ws.onmessage = (event) => {
+            console.log("수신된 데이터:", event.data)
+            const data = JSON.parse(event.data);
+            setProfitData({
+                profitAmount: Number(data.profitAmount),
+                profitRate: Number(data.profitRate),
+                position: data.position,
+            });
+
+            setCurrentPositions((prev) =>
+                prev.map((pos) =>
+                    pos.type === data.position
+                        ? { ...pos, profitAmount: data.profitAmount, profitRate: data.profitRate }
+                        : pos
+                )
+            );
+        };
+
+        ws.onerror = (error) => {
+            console.error('수익 웹소켓 오류:', error);
+        };
+
+        ws.onclose = () => {return;};
+
+        setProfitSocket(ws);
+
+        return () => {
+            if (ws) ws.close();
+        };
+    }, [isLoggedIn, userId]);
 
     const fetchBalance = async () => {
         if (!isLoggedIn) {
@@ -342,8 +389,8 @@ const Exchange = () => {
                         </button>
                     </div>
                     <div className="tab-content">
-                        {activeTab === 'positions' ? (
-                            currentPositions.length > 0 ? (
+                        {profitData.position != null ? (
+                            profitData.length > 0 ? (
                                 currentPositions.map((position) => (
                                     <div key={position.id} className="position-item">
                                         <div>
@@ -352,6 +399,9 @@ const Exchange = () => {
                                             </span>
                                             <div>가격: ₩{Number(position.price).toLocaleString()}</div>
                                             <div>수량: {position.amount} BTC</div>
+                                            <div>수익 금액: ₩{Number(profitData.profitAmount || 0).toLocaleString()}</div>
+                                            <div>수익률: {(profitData.profitRate || 0).toFixed(2)}%</div>
+                                            <div>포지션: {profitData.position}</div>
                                         </div>
                                         <button className="sell-button" onClick={() => handleSellPosition(position.id)}>
                                             판매
