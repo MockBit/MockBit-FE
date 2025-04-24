@@ -282,7 +282,7 @@ const Exchange = () => {
             return;
         }
         try {
-            const response = await fetch('http://localhost:8080/api/limit/orders/register', {
+            const response = await fetch('http://localhost:8080/api/limit/orders/buy', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -317,7 +317,7 @@ const Exchange = () => {
             return;
         }
         try {
-            const response = await fetch('http://localhost:8080/api/market/orders/register', {
+            const response = await fetch('http://localhost:8080/api/market/orders/buy', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
