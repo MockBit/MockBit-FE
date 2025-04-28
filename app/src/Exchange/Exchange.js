@@ -115,6 +115,10 @@ const Exchange = () => {
         }
     };
 
+    useEffect(() => {
+        fetchBalance();
+    }, [isLoggedIn]);
+
     const fetchPendingOrders = async () => {
         if (!isLoggedIn) return;
         try {
@@ -302,7 +306,7 @@ const Exchange = () => {
             alert(`${position.toUpperCase()} 지정가 주문이 실행되었습니다!`);
         } catch (error) {
             console.error("주문 오류:", error);
-            alert("주문 처리 중 오류 발생");
+            alert(error);
         }
     };
 
@@ -334,7 +338,7 @@ const Exchange = () => {
             alert(`${position.toUpperCase()} 시장가 주문이 실행되었습니다!`);
         } catch (error) {
             console.error("주문 오류:", error);
-            alert("주문 처리 중 오류 발생");
+            alert(error);
         }
     };
 
@@ -423,7 +427,7 @@ const Exchange = () => {
                                         </div>
                                         <div className="order-details">
                                             <div>가격: ₩{Number(order.price).toLocaleString()}</div>
-                                            <div>수량: {order.amount} BTC</div>
+                                            <div>수량: {order.btcPrice} BTC</div>
                                         </div>
                                         <div className="order-actions">
                                             <button className="edit-button" onClick={() => handleEditOrder(order.id)}>수정</button>
