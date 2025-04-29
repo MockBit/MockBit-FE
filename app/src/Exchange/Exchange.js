@@ -117,6 +117,7 @@ const Exchange = () => {
 
     useEffect(() => {
         fetchBalance();
+        fetchPendingOrders();
     }, [isLoggedIn]);
 
     const fetchPendingOrders = async () => {
@@ -133,7 +134,8 @@ const Exchange = () => {
             }
             if (!response.ok) throw new Error('미체결 주문 조회 실패');
             const data = await response.json();
-            setPendingOrders(data);
+            setPendingOrders(data.orders);
+            console.log(data.orders);
         } catch (error) {
             console.error('미체결 주문 조회 오류:', error);
         }
@@ -393,25 +395,13 @@ const Exchange = () => {
                         </button>
                     </div>
                     <div className="tab-content">
-                        {profitData.position != null ? (
-                            profitData.length > 0 ? (
-                                currentPositions.map((position) => (
-                                    <div key={position.id} className="position-item">
-                                        <div>
-                                            <span className={`order-type-tag ${position.type}`}>
-                                                {position.type.toUpperCase()}
-                                            </span>
-                                            <div>가격: ₩{Number(position.price).toLocaleString()}</div>
-                                            <div>수량: {position.amount} BTC</div>
-                                            <div>수익 금액: ₩{Number(profitData.profitAmount || 0).toLocaleString()}</div>
-                                            <div>수익률: {(profitData.profitRate || 0).toFixed(2)}%</div>
-                                            <div>포지션: {profitData.position}</div>
-                                        </div>
-                                        <button className="sell-button" onClick={() => handleSellPosition(position.id)}>
-                                            판매
-                                        </button>
-                                    </div>
-                                ))
+                        {activeTab === 'positions' ? (
+                            profitData.position ? (
+                                <div>
+                                    <div>수익 금액: ₩{Number(profitData.profitAmount || 0).toLocaleString()}</div>
+                                    <div>수익률: {(profitData.profitRate || 0).toFixed(2)}%</div>
+                                    <div>포지션: {profitData.position}</div>
+                                </div>
                             ) : (
                                 <p>진입 중인 포지션이 없습니다.</p>
                             )
@@ -420,14 +410,20 @@ const Exchange = () => {
                                 pendingOrders.map((order) => (
                                     <div key={order.id} className="order-item">
                                         <div className="order-item-header">
-                                            <span className={`order-type-tag ${order.type}`}>
-                                                {order.type.toUpperCase()}
+                                            <span className={`order-type-tag ${order.type ? order.type.toUpperCase() : 'UNKNOWN'}`}>
+                                                {order.type ? order.type.toUpperCase() : 'UNKNOWN'}
                                             </span>
-                                            <span>{new Date(order.timestamp).toLocaleTimeString()}</span>
+                                            <span>{new Date(order.orderedAt).toLocaleTimeString()}</span>
                                         </div>
                                         <div className="order-details">
+                                            <div>주문 ID: {order.id}</div>
                                             <div>가격: ₩{Number(order.price).toLocaleString()}</div>
                                             <div>수량: {order.btcPrice} BTC</div>
+                                            <div>주문 가격: ₩{Number(order.orderPrice).toLocaleString()}</div>
+                                            <div>레버리지: {order.leverage}x</div>
+                                            <div>포지션: {order.position}</div>
+                                            <div>매수/매도: {order.sellOrBuy}</div>
+                                            <div>주문 시간: {new Date(order.orderedAt).toLocaleString()}</div>
                                         </div>
                                         <div className="order-actions">
                                             <button className="edit-button" onClick={() => handleEditOrder(order.id)}>수정</button>
