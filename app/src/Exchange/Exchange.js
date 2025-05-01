@@ -398,7 +398,7 @@ const Exchange = () => {
                         {activeTab === 'positions' ? (
                             profitData.position ? (
                                 <div>
-                                    <div>수익 금액: ₩{Number(profitData.profitAmount || 0).toLocaleString()}</div>
+                                    <div>수익 금액: {Number(profitData.profitAmount || 0).toLocaleString()}원</div>
                                     <div>수익률: {(profitData.profitRate || 0).toFixed(2)}%</div>
                                     <div>포지션: {profitData.position}</div>
                                 </div>
