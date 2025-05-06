@@ -344,11 +344,6 @@ const Exchange = () => {
         }
     };
 
-    const handleEditOrder = (orderId) => {
-        // 주문 수정 로직 구현
-        console.log('주문 수정:', orderId);
-    };
-
     const handleCancelOrder = (orderId) => {
         setPendingOrders(pendingOrders.filter(order => order.id !== orderId));
     };
@@ -426,7 +421,6 @@ const Exchange = () => {
                                             <div>주문 시간: {new Date(order.orderedAt).toLocaleString()}</div>
                                         </div>
                                         <div className="order-actions">
-                                            <button className="edit-button" onClick={() => handleEditOrder(order.id)}>수정</button>
                                             <button className="cancel-button" onClick={() => handleCancelOrder(order.id)}>취소</button>
                                         </div>
                                     </div>
