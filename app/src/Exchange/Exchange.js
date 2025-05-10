@@ -344,8 +344,32 @@ const Exchange = () => {
         }
     };
 
-    const handleCancelOrder = (orderId) => {
-        setPendingOrders(pendingOrders.filter(order => order.id !== orderId));
+    const handleCancelOrder = async (orderId) => {
+        if (!isLoggedIn) {
+            alert("로그인이 필요한 서비스입니다.");
+            navigate('/login');
+            return;
+        }
+        if (!orderId) {
+            alert("존재하지 않는 주문입니다.");
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:8080/api/limit/orders/cancel/orders`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId }),
+                credentials: 'include',
+            });
+
+            if (!response.ok) throw new Error("주문 실패");
+            fetchBalance();
+            fetchPendingOrders();
+            alert(`주문이 취소되었습니다!`);
+        } catch (error) {
+            console.error("주문 오류:", error);
+            alert(error);
+        }
     };
 
     const handleSellPosition = (positionId) => {
@@ -412,8 +436,7 @@ const Exchange = () => {
                                         </div>
                                         <div className="order-details">
                                             <div>주문 ID: {order.id}</div>
-                                            <div>가격: ₩{Number(order.price).toLocaleString()}</div>
-                                            <div>수량: {order.btcPrice} BTC</div>
+                                            <div>BTC 가격: ₩{Number(order.price).toLocaleString()}</div>
                                             <div>주문 가격: ₩{Number(order.orderPrice).toLocaleString()}</div>
                                             <div>레버리지: {order.leverage}x</div>
                                             <div>포지션: {order.position}</div>
