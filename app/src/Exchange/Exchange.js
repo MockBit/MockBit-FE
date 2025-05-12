@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { init, dispose } from 'klinecharts';
+import { init, dispose, registerOverlay } from 'klinecharts';
 import { AuthContext } from '../Login/AuthContext';
 import './Exchange.css';
 
@@ -27,6 +27,8 @@ const Exchange = () => {
         profitRate: 0,
         position: null,
     });
+    const [avgEntryPrice, setAvgEntryPrice] = useState(null);
+    const [liquidationPrice, setLiquidationPrice] = useState(null);
 
     useEffect(() => {
         const newChart = init('kline-chart');
@@ -57,7 +59,6 @@ const Exchange = () => {
 
     useEffect(() => {
         if (!isLoggedIn || !userId) return;
-        console.log("User ID:", userId);
 
         const ws = new WebSocket(`ws://localhost:8080/ws/profit?userId=${userId}`);
 
@@ -118,6 +119,8 @@ const Exchange = () => {
     useEffect(() => {
         fetchBalance();
         fetchPendingOrders();
+        fetchAvgEntryPrice();
+        fetchLiquidationPrice();
     }, [isLoggedIn]);
 
     const fetchPendingOrders = async () => {
@@ -159,6 +162,38 @@ const Exchange = () => {
             chartInstance.applyNewData(formattedData);
         } catch (error) {
             console.error("차트 데이터 오류:", error);
+        }
+    };
+
+    const fetchAvgEntryPrice = async () => {
+        if (!isLoggedIn || !userId) return;
+        try {
+            const response = await fetch(`http://localhost:8080/api/accounts/avg-entry-price`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+            });
+            if (!response.ok) throw new Error('평단가 조회 실패');
+            const data = await response.json();
+            setAvgEntryPrice(data.avgEntryPrice);
+        } catch (error) {
+            console.error('평단가 조회 오류:', error);
+        }
+    };
+
+    const fetchLiquidationPrice = async () => {
+        if (!isLoggedIn || !userId) return;
+        try {
+            const response = await fetch(`http://localhost:8080/api/accounts/liquidation-price`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+            });
+            if (!response.ok) throw new Error('청산가 조회 실패');
+            const data = await response.json();
+            setLiquidationPrice(data.liquidationPrice);
+        } catch (error) {
+            console.error('청산가 조회 오류:', error);
         }
     };
 
