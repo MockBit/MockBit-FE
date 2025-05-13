@@ -451,38 +451,38 @@ const Exchange = () => {
                     <div className="tab-content">
                         {activeTab === 'positions' ? (
                             profitData.position ? (
-                                <div>
-                                    <div>수익 금액: {Number(profitData.profitAmount || 0).toLocaleString()}원</div>
-                                    <div>수익률: {(profitData.profitRate || 0).toFixed(2)}%</div>
-                                    <div>포지션: {profitData.position}</div>
+                                <div className={`position-card ${profitData.position.toLowerCase()}`}>
+                                <h4>{profitData.position} 포지션</h4>
+                                    <div className="position-metrics">
+                                        <div><span>수익 금액:</span> {Number(profitData.profitAmount).toLocaleString()} 원</div>
+                                        <div><span>수익률:</span> {profitData.profitRate.toFixed(2)}%</div>
+                                    </div>
                                 </div>
                             ) : (
                                 <p>진입 중인 포지션이 없습니다.</p>
                             )
                         ) : (
                             pendingOrders.length > 0 ? (
-                                pendingOrders.map((order) => (
-                                    <div key={order.id} className="order-item">
-                                        <div className="order-item-header">
-                                            <span className={`order-type-tag ${order.type ? order.type.toUpperCase() : 'UNKNOWN'}`}>
-                                                {order.type ? order.type.toUpperCase() : 'UNKNOWN'}
-                                            </span>
-                                            <span>{new Date(order.orderedAt).toLocaleTimeString()}</span>
+                                <div className="order-list">
+                                    {pendingOrders.map((order) => (
+                                        <div key={order.id} className="order-card">
+                                            <div className="order-card-header">
+                                                <span className={`order-tag ${order.position?.toLowerCase()}`}>{order.position}</span>
+                                                <span className="order-time">{new Date(order.orderedAt).toLocaleTimeString()}</span>
+                                            </div>
+                                            <div className="order-card-body">
+                                                <div><strong>포지션:</strong> {order.position}</div>
+                                                <div><strong>BTC 가격:</strong> ₩{Number(order.price).toLocaleString()}</div>
+                                                <div><strong>주문 금액:</strong> ₩{Number(order.orderPrice).toLocaleString()}</div>
+                                                <div><strong>레버리지:</strong> {order.leverage}x</div>
+                                                <div><strong>구매/판매:</strong> {order.sellOrBuy}</div>
+                                            </div>
+                                            <div className="order-card-footer">
+                                                <button className="cancel-button" onClick={() => handleCancelOrder(order.id)}>취소</button>
+                                            </div>
                                         </div>
-                                        <div className="order-details">
-                                            <div>주문 ID: {order.id}</div>
-                                            <div>BTC 가격: ₩{Number(order.price).toLocaleString()}</div>
-                                            <div>주문 가격: ₩{Number(order.orderPrice).toLocaleString()}</div>
-                                            <div>레버리지: {order.leverage}x</div>
-                                            <div>포지션: {order.position}</div>
-                                            <div>매수/매도: {order.sellOrBuy}</div>
-                                            <div>주문 시간: {new Date(order.orderedAt).toLocaleString()}</div>
-                                        </div>
-                                        <div className="order-actions">
-                                            <button className="cancel-button" onClick={() => handleCancelOrder(order.id)}>취소</button>
-                                        </div>
-                                    </div>
-                                ))
+                                    ))}
+                                </div>
                             ) : (
                                 <p>미채결 거래가 없습니다.</p>
                             )

@@ -251,6 +251,68 @@ input[type="range"]::-webkit-slider-thumb {
     color: white;
 }
 
+.order-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem 0;
+}
+
+.order-card {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-left: 4px solid #26a69a;
+    border-radius: 8px;
+    padding: 0.8rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s ease;
+}
+
+.order-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.order-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+
+.order-tag {
+    font-weight: bold;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.order-tag.long {
+    background: #e0f7f5;
+    color: #26a69a;
+}
+
+.order-tag.short {
+    background: #ffebee;
+    color: #ef5350;
+}
+
+.order-time {
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.order-card-body {
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.6;
+}
+
+.order-card-footer {
+    margin-top: 1rem;
+    text-align: right;
+}
+
 .order-item {
     background: #f8f9fa;
     padding: 0.8rem;
@@ -309,6 +371,8 @@ input[type="range"]::-webkit-slider-thumb {
 .cancel-button {
     background: #ffebee;
     color: #ef5350;
+    border: 1px #ef5350;
+    border-radius: 4px;
 }
 
 .position-item {
@@ -338,4 +402,39 @@ input[type="range"]::-webkit-slider-thumb {
 
 .balance-info span {
     color: #333;
+}
+
+.position-card {
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #ccc;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s ease;
+}
+
+.position-card.long {
+    border-color: #26a69a;
+}
+
+.position-card.short {
+    border-color: #ef5350;
+}
+
+.position-card h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: #1a1a1a;
+}
+
+.position-metrics {
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.6;
+}
+
+.position-metrics span {
+    font-weight: 600;
+    color: #666;
+    margin-right: 0.4rem;
 }
