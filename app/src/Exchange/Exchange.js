@@ -17,6 +17,7 @@ const Exchange = () => {
     const [price, setPrice] = useState('');
     const [orderPrice, setOrderPrice] = useState('');
     const [leverage, setLeverage] = useState(1);
+    const [showSellPanel, setShowSellPanel] = useState(false);
     const [btcAmount, setBtcAmount] = useState('');
 
     const [pendingOrders, setPendingOrders] = useState([]);
@@ -514,10 +515,23 @@ const Exchange = () => {
                         {activeTab === 'positions' ? (
                             profitData.position ? (
                                 <div className={`position-card ${profitData.position.toLowerCase()}`}>
-                                <h4>{profitData.position} 포지션</h4>
+                                    <h4>{profitData.position} 포지션</h4>
                                     <div className="position-metrics">
-                                        <div><span>수익 금액:</span> {Number(profitData.profitAmount).toLocaleString()} 원</div>
-                                        <div><span>수익률:</span> {profitData.profitRate.toFixed(2)}%</div>
+                                        <div
+                                            className={profitData.profitAmount >= 0 ? 'profit-positive' : 'profit-negative'}
+                                        >
+                                            <span>수익 금액:</span> 
+                                            {(profitData.profitAmount >= 0 ? '+' : '') + Number(profitData.profitAmount).toLocaleString()} 원
+                                        </div>
+                                        <div
+                                            className={profitData.profitRate >= 0 ? 'profit-positive' : 'profit-negative'}
+                                        >
+                                            <span>수익률:</span> 
+                                            {(profitData.profitRate >= 0 ? '+' : '') + profitData.profitRate.toFixed(2)}%
+                                        </div>
+                                        <button className="sell-position-button" onClick={() => setShowSellPanel(true)}>
+                                            포지션 판매
+                                        </button>
                                     </div>
                                 </div>
                             ) : (
@@ -644,6 +658,66 @@ const Exchange = () => {
                     </button>
                 </div>
             </motion.div>
+            {showSellPanel && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>포지션 판매</h3>
+
+                        <div className="order-type">
+                            <button className={orderType === 'limit' ? 'active' : ''} onClick={() => setOrderType('limit')}>
+                                지정가
+                            </button>
+                            <button className={orderType === 'market' ? 'active' : ''} onClick={() => setOrderType('market')}>
+                                시장가
+                            </button>
+                        </div>
+
+                        {orderType === 'limit' && (
+                            <div className="input-group">
+                                <label>판매 희망 가격 (KRW)</label>
+                                <input
+                                    type="number"
+                                    placeholder="지정가 입력"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                />
+                            </div>
+                        )}
+
+                        <div className="input-group">
+                            <label>판매 수량 (BTC)</label>
+                            <input
+                                type="number"
+                                placeholder="판매할 BTC 수량"
+                                value={btcAmount}
+                                onChange={(e) => setBtcAmount(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="modal-buttons">
+                            <button
+                                className="sell-button"
+                                onClick={() => {
+                                    if (orderType === 'market') {
+                                        executeSellMarketOrder('SELL');
+                                    } else {
+                                        executeSellLimitOrder('SELL');
+                                    }
+                                    setShowSellPanel(false);
+                                }}
+                            >
+                                판매
+                            </button>
+                            <button
+                                className="cancel-button"
+                                onClick={() => setShowSellPanel(false)}
+                            >
+                                취소
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
