@@ -24,6 +24,7 @@ const Exchange = () => {
     const [currentPositions, setCurrentPositions] = useState([]);
     const { isLoggedIn, userId } = useContext(AuthContext);
     const [balance, setBalance] = useState(null);
+    const [btc, setBtc] = useState(null);
     const [activeTab, setActiveTab] = useState('positions');
     const [btcPrice, setBtcPrice] = useState('');
     const [profitData, setProfitData] = useState({
@@ -120,8 +121,28 @@ const Exchange = () => {
         }
     };
 
+    const fetchBtc = async () => {
+        if (!isLoggedIn) {
+            setBtc(0);
+            return;
+        }
+        try {
+            const response = await fetch('http://localhost:8080/api/accounts/btc', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+            });
+            if (!response.ok) throw new Error('잔액 조회 실패');
+            const data = await response.json();
+            setBtc(data.btc);
+        } catch (error) {
+            console.error('잔액 조회 오류:', error);
+        }
+    };
+
     useEffect(() => {
         fetchBalance();
+        fetchBtc();
         fetchPendingOrders();
         fetchAvgEntryPrice();
         fetchLiquidationPrice();
@@ -658,66 +679,70 @@ const Exchange = () => {
                     </button>
                 </div>
             </motion.div>
-            {showSellPanel && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h3>포지션 판매</h3>
+                {showSellPanel && (
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <h3>포지션 판매</h3>
+                            <div className="balance-info">
+                                <label>판매가능</label>
+                                <span>{btc !== null ? `${Number(btc).toFixed(6)} BTC` : '0'}</span>
+                            </div>
 
-                        <div className="order-type">
-                            <button className={orderType === 'limit' ? 'active' : ''} onClick={() => setOrderType('limit')}>
-                                지정가
-                            </button>
-                            <button className={orderType === 'market' ? 'active' : ''} onClick={() => setOrderType('market')}>
-                                시장가
-                            </button>
-                        </div>
+                            <div className="order-type">
+                                <button className={orderType === 'limit' ? 'active' : ''} onClick={() => setOrderType('limit')}>
+                                    지정가
+                                </button>
+                                <button className={orderType === 'market' ? 'active' : ''} onClick={() => setOrderType('market')}>
+                                    시장가
+                                </button>
+                            </div>
 
-                        {orderType === 'limit' && (
+                            {orderType === 'limit' && (
+                                <div className="input-group">
+                                    <label>판매 희망 가격 (KRW)</label>
+                                    <input
+                                        type="number"
+                                        placeholder="지정가 입력"
+                                        value={price}
+                                        onChange={(e) => setPrice(e.target.value)}
+                                    />
+                                </div>
+                            )}
+
                             <div className="input-group">
-                                <label>판매 희망 가격 (KRW)</label>
+                                <label>판매 수량 (BTC)</label>
                                 <input
                                     type="number"
-                                    placeholder="지정가 입력"
-                                    value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
+                                    placeholder="판매할 BTC 수량"
+                                    value={btcAmount}
+                                    onChange={(e) => setBtcAmount(e.target.value)}
                                 />
                             </div>
-                        )}
 
-                        <div className="input-group">
-                            <label>판매 수량 (BTC)</label>
-                            <input
-                                type="number"
-                                placeholder="판매할 BTC 수량"
-                                value={btcAmount}
-                                onChange={(e) => setBtcAmount(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="modal-buttons">
-                            <button
-                                className="sell-button"
-                                onClick={() => {
-                                    if (orderType === 'market') {
-                                        executeSellMarketOrder('SELL');
-                                    } else {
-                                        executeSellLimitOrder('SELL');
-                                    }
-                                    setShowSellPanel(false);
-                                }}
-                            >
-                                판매
-                            </button>
-                            <button
-                                className="cancel-button"
-                                onClick={() => setShowSellPanel(false)}
-                            >
-                                취소
-                            </button>
+                            <div className="modal-buttons">
+                                <button
+                                    className="sell-button"
+                                    onClick={() => {
+                                        if (orderType === 'market') {
+                                            executeSellMarketOrder('SELL');
+                                        } else {
+                                            executeSellLimitOrder('SELL');
+                                        }
+                                        setShowSellPanel(false);
+                                    }}
+                                >
+                                    판매
+                                </button>
+                                <button
+                                    className="cancel-button"
+                                    onClick={() => setShowSellPanel(false)}
+                                >
+                                    취소
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
         </div>
     );
 };
