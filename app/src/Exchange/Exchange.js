@@ -113,8 +113,12 @@ const Exchange = () => {
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             });
-            if (!response.ok) throw new Error('잔액 조회 실패');
+
             const data = await response.json();
+            if (!response.ok) {
+                const errorMsg = data.message || "주문 실패";
+                throw new Error(errorMsg);
+            }
             setBalance(data.balance);
         } catch (error) {
             console.error('잔액 조회 오류:', error);
@@ -132,8 +136,13 @@ const Exchange = () => {
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             });
-            if (!response.ok) throw new Error('잔액 조회 실패');
+
             const data = await response.json();
+            if (!response.ok) {
+                const errorMsg = data.message || "잔액 조회 실패";
+                throw new Error(errorMsg);
+            }
+            
             setBtc(data.btc);
         } catch (error) {
             console.error('잔액 조회 오류:', error);
@@ -160,8 +169,13 @@ const Exchange = () => {
                 setPendingOrders([]);
                 return;
             }
-            if (!response.ok) throw new Error('미체결 주문 조회 실패');
+
             const data = await response.json();
+            if (!response.ok) {
+                const errorMsg = data.message || "미채결 주문 조회 실패";
+                throw new Error(errorMsg);
+            }
+            
             setPendingOrders(data.orders);
             console.log(data.orders);
         } catch (error) {
@@ -198,8 +212,13 @@ const Exchange = () => {
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             });
-            if (!response.ok) throw new Error('평단가 조회 실패');
+            
             const data = await response.json();
+            if (!response.ok) {
+                const errorMsg = data.message || "평단가 조회 실패";
+                throw new Error(errorMsg);
+            }
+            
             setAvgEntryPrice(data.avgEntryPrice);
         } catch (error) {
             console.error('평단가 조회 오류:', error);
@@ -214,8 +233,13 @@ const Exchange = () => {
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             });
-            if (!response.ok) throw new Error('청산가 조회 실패');
+
             const data = await response.json();
+            if (!response.ok) {
+                const errorMsg = data.message || "정산가 조회 실패";
+                throw new Error(errorMsg);
+            }
+            
             setLiquidationPrice(data.liquidationPrice);
         } catch (error) {
             console.error('청산가 조회 오류:', error);
@@ -362,7 +386,12 @@ const Exchange = () => {
                 credentials: 'include',
             });
 
-            if (!response.ok) throw new Error("주문 실패");
+            const data = await response.json();    
+            if (!response.ok) {
+                const errorMsg = data.message || "주문 실패";
+                throw new Error(errorMsg);
+            }
+
             fetchBalance();
             fetchPendingOrders();
             alert(`${position.toUpperCase()} 지정가 주문이 실행되었습니다!`);
@@ -395,7 +424,12 @@ const Exchange = () => {
                 credentials: 'include',
             });
 
-            if (!response.ok) throw new Error("주문 실패");
+            const data = await response.json();
+            if (!response.ok) {
+                const errorMsg = data.message || "주문 실패";
+                throw new Error(errorMsg);
+            }
+
             fetchBalance();
             alert(`${position.toUpperCase()} 시장가 주문이 실행되었습니다!`);
         } catch (error) {
@@ -427,8 +461,13 @@ const Exchange = () => {
                 }),
                 credentials: 'include',
             });
+            
+            const data = await response.json();
+            if (!response.ok) {
+                const errorMsg = data.message || "주문 실패";
+                throw new Error(errorMsg);
+            }
 
-            if (!response.ok) throw new Error("주문 실패");
             fetchBalance();
             alert(`${position.toUpperCase()} 시장가 주문이 실행되었습니다!`);
         } catch (error) {
@@ -458,8 +497,13 @@ const Exchange = () => {
                 }),
                 credentials: 'include',
             });
+            
+            const data = await response.json();
+            if (!response.ok) {
+                const errorMsg = data.message || "주문 실패";
+                throw new Error(errorMsg);
+            }
 
-            if (!response.ok) throw new Error("주문 실패");
             fetchBalance();
             alert(`${position.toUpperCase()} 시장가 주문이 실행되었습니다!`);
         } catch (error) {
@@ -486,7 +530,12 @@ const Exchange = () => {
                 credentials: 'include',
             });
 
-            if (!response.ok) throw new Error("주문 실패");
+            const data = await response.json();
+            if (!response.ok) {
+                const errorMsg = data.message || "주문 실패";
+                throw new Error(errorMsg);
+            }
+            
             fetchBalance();
             fetchPendingOrders();
             alert(`주문이 취소되었습니다!`);
