@@ -11,11 +11,14 @@ const Exchange = () => {
     const [timeframe, setTimeframe] = useState('1440');
     const [socket, setSocket] = useState(null);
     const [profitSocket, setProfitSocket] = useState(null);
+
     const [orderType, setOrderType] = useState('limit');
     const [position, setPosition] = useState('LONG');
     const [price, setPrice] = useState('');
     const [orderPrice, setOrderPrice] = useState('');
     const [leverage, setLeverage] = useState(1);
+    const [btcAmount, setBtcAmount] = useState('');
+
     const [pendingOrders, setPendingOrders] = useState([]);
     const [currentPositions, setCurrentPositions] = useState([]);
     const { isLoggedIn, userId } = useContext(AuthContext);
@@ -379,6 +382,70 @@ const Exchange = () => {
         }
     };
 
+    const executeSellLimitOrder = async (type) => {
+        if (!isLoggedIn) {
+            alert("로그인이 필요한 서비스입니다.");
+            navigate('/login');
+            return;
+        }
+        if (!btcAmount || btcAmount.trim() === "") {
+            alert("수량을 입력해주세요.");
+            return;
+        }
+        try {
+            const response = await fetch('http://localhost:8080/api/limit/orders/sell', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    price: price,
+                    btcPrice: btcPrice,
+                    btcAmount: btcAmount,
+                    position: position,
+                    sellOrBuy: type
+                }),
+                credentials: 'include',
+            });
+
+            if (!response.ok) throw new Error("주문 실패");
+            fetchBalance();
+            alert(`${position.toUpperCase()} 시장가 주문이 실행되었습니다!`);
+        } catch (error) {
+            console.error("주문 오류:", error);
+            alert(error);
+        }
+    };
+
+    const executeSellMarketOrder = async (type) => {
+        if (!isLoggedIn) {
+            alert("로그인이 필요한 서비스입니다.");
+            navigate('/login');
+            return;
+        }
+        if (!btcAmount || btcAmount.trim() === "") {
+            alert("수량을 입력해주세요.");
+            return;
+        }
+        try {
+            const response = await fetch('http://localhost:8080/api/market/orders/sell', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    btcAmount: btcAmount,
+                    position: position,
+                    sellOrBuy: type
+                }),
+                credentials: 'include',
+            });
+
+            if (!response.ok) throw new Error("주문 실패");
+            fetchBalance();
+            alert(`${position.toUpperCase()} 시장가 주문이 실행되었습니다!`);
+        } catch (error) {
+            console.error("주문 오류:", error);
+            alert(error);
+        }
+    };
+
     const handleCancelOrder = async (orderId) => {
         if (!isLoggedIn) {
             alert("로그인이 필요한 서비스입니다.");
@@ -405,11 +472,6 @@ const Exchange = () => {
             console.error("주문 오류:", error);
             alert(error);
         }
-    };
-
-    const handleSellPosition = (positionId) => {
-        setCurrentPositions(currentPositions.filter(pos => pos.id !== positionId));
-        // 실제 판매 로직 추가 가능
     };
 
     return (
