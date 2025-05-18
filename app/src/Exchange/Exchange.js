@@ -522,6 +522,10 @@ const Exchange = () => {
             alert("존재하지 않는 주문입니다.");
             return;
         }
+
+        const isConfirmed = window.confirm("정말 이 주문을 취소하시겠습니까?");
+        if (!isConfirmed) return;
+
         try {
             const response = await fetch(`http://localhost:8080/api/limit/orders/cancel/orders`, {
                 method: 'DELETE',
